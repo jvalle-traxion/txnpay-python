@@ -37,3 +37,22 @@ response = traxionpay.cash_in(merchant_id=6328,
 ```python
 response = traxionpay.cash_out(otp="AB12DE34", bank_account=413, amount=100.0)
 ```
+#### Link a bank account
+```python
+traxionpay.link_bank_account(bank_code="161311",
+                             bank_type="savings",
+                             account_number="9012345678",
+                             account_name="John Doe")
+```
+#### Fetch Cash Out OTP
+```python
+otp = traxionpay.fetch_otp()
+```
+#### Fetch bank accounts
+```python
+bank_accounts = traxionpay.fetch_bank_accounts()
+```
+#### Fetch banks
+```python
+banks = traxionpay.fetch_banks()
+```
