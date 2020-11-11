@@ -1,40 +1,58 @@
+"""
+traxionpay module containing cash in and cash out functions
+"""
 import base64
 import json
 import hmac
 import hashlib
 import requests
 
-from .utils import (generate_token, is_valid_amount, is_valid_string,
-                    is_valid_id, is_length_acceptable)
+from .constants import BASE_URL
+from .exceptions import MissingAuthenticationError, APIResponseError
+from .utils import (generate_token,
+                    is_valid_amount,
+                    is_valid_string,
+                    is_valid_id,
+                    is_valid_bank_type,
+                    is_length_acceptable)
 
 
 class TraxionPay():
     """Core object for using TraxionPay's `cash_in` and `cash_out` functionalities.
 
-    :param api_key: A key that can be retrieved from developer's page.
+        :param api_key:
 
-    :param secret_key: A key that is used for generating tokens.
-    The key can be retrieved from developer's page.
+        :param secret_key:
 
+        See full documentation at <https://dev.traxionpay.com/developers-guide>.
     """
 
-    def __init__(self, secret_key=None, api_key=None):
+    def __init__(self, secret_key=None,  api_key=None):
         try:
-            self.token = generate_token(secret_key=secret_key)
             self.secret_key = secret_key
             self.api_key = api_key
+            self.token = generate_token(secret_key=secret_key)
+            self.auth_headers = {
+                'Authorization': 'Basic {}'.format(self.token),
+                'Content-Type': 'application/json'
+            }
         except:
             raise ValueError('Secret key and API key cannot be null')
 
-    def cash_in(self, merchant_id=None, merchant_ref_no=None, description=None,
-                amount=None, merchant_additional_data=None, currency=None,
-                billing_email=None, billing_first_name=None, billing_last_name=None,
-                billing_middle_name=None, billing_phone=None, billing_mobile=None,
-                billing_address=None, billing_address2=None, billing_city=None,
-                billing_state=None, billing_zip=None, billing_country=None,
-                billing_remark=None, payment_method=None, status_notification_url=None,
-                success_page_url=None, failure_page_url=None, cancel_page_url=None,
-                pending_page_url=None):
+    def cash_in(self,
+                merchant_id=None,
+                merchant_ref_no=None,
+                description=None,
+                amount=None,
+                currency=None,
+                merchant_additional_data=None,
+                payment_method=None,
+                status_notification_url=None,
+                success_page_url=None,
+                failure_page_url=None,
+                cancel_page_url=None,
+                pending_page_url=None,
+                **billing_details):
         """Cash In enables merchants to receive money through the application.
             Through this feature, merchants receive payments and store it in their in-app wallet.
 
@@ -42,16 +60,14 @@ class TraxionPay():
 
             :param merchant_id: [`int`] ID of the merchant that would accept the amount to cash in.
 
-            :param merchant_ref_no: [`str,100`] A unique transaction code that identifies the transaction.
+            :param merchant_ref_no: [`str,100`] A unique transaction code
+            that identifies the transaction.
 
             :param description: [`str,500`] A description that describes the transaction.
 
             :param amount: [`float|int`] The amount to be cashed-in to an account.
 
-            :param billing_email: [`str|None,200`] Email address of the billing detail.
-
-            :returns URL of PayForm:
-
+            :param currency: [`float|None`] The currency of the amount. Defaults to `PHP` if None.
         """
         payform_data = {}
 
@@ -119,6 +135,7 @@ class TraxionPay():
             payform_data['currency'] = 'PHP'
 
         # billing email
+        billing_email = billing_details.get('billing_email')
         if billing_email is not None:
             if is_valid_string(billing_email):
                 payform_data['billing_email'] = billing_email
@@ -128,6 +145,7 @@ class TraxionPay():
             payform_data['billing_email'] = ''
 
         # billing first name
+        billing_first_name = billing_details.get('billing_first_name')
         if billing_first_name is not None:
             if is_valid_string(billing_first_name):
                 payform_data['billing_first_name'] = billing_first_name
@@ -137,6 +155,7 @@ class TraxionPay():
             payform_data['billing_first_name'] = ''
 
         # billing last name
+        billing_last_name = billing_details.get('billing_last_name')
         if billing_last_name is not None:
             if is_valid_string(billing_last_name):
                 payform_data['billing_last_name'] = billing_last_name
@@ -146,6 +165,7 @@ class TraxionPay():
             payform_data['billing_last_name'] = ''
 
         # billing middle name
+        billing_middle_name = billing_details.get('billing_middle_name')
         if billing_middle_name is not None:
             if is_valid_string(billing_middle_name):
                 payform_data['billing_middle_name'] = billing_middle_name
@@ -155,6 +175,7 @@ class TraxionPay():
             payform_data['billing_middle_name'] = ''
 
         # billing phone
+        billing_phone = billing_details.get('billing_phone')
         if billing_phone is not None:
             if is_valid_string(billing_phone):
                 payform_data['billing_phone'] = billing_phone
@@ -164,6 +185,7 @@ class TraxionPay():
             payform_data['billing_phone'] = ''
 
         # billing mobile
+        billing_mobile = billing_details.get('billing_mobile')
         if billing_mobile is not None:
             if is_valid_string(billing_mobile):
                 payform_data['billing_mobile'] = billing_mobile
@@ -172,7 +194,8 @@ class TraxionPay():
         else:
             payform_data['billing_mobile'] = ''
 
-        # billing phone
+        # billing address
+        billing_address = billing_details.get('billing_address')
         if billing_address is not None:
             if is_valid_string(billing_address):
                 payform_data['billing_address'] = billing_address
@@ -181,7 +204,8 @@ class TraxionPay():
         else:
             payform_data['billing_address'] = ''
 
-        # billing mobile
+        # billing address2
+        billing_address2 = billing_details.get('billing_address2')
         if billing_address2 is not None:
             if is_valid_string(billing_address2):
                 payform_data['billing_address2'] = billing_address2
@@ -190,7 +214,8 @@ class TraxionPay():
         else:
             payform_data['billing_address2'] = ''
 
-        # billing phone
+        # billing city
+        billing_city = billing_details.get('billing_city')
         if billing_city is not None:
             if is_valid_string(billing_city):
                 payform_data['billing_city'] = billing_city
@@ -199,7 +224,8 @@ class TraxionPay():
         else:
             payform_data['billing_city'] = ''
 
-        # billing mobile
+        # billing state
+        billing_state = billing_details.get('billing_state')
         if billing_state is not None:
             if is_valid_string(billing_state):
                 payform_data['billing_state'] = billing_state
@@ -209,6 +235,7 @@ class TraxionPay():
             payform_data['billing_state'] = ''
 
         # billing zip
+        billing_zip = billing_details.get('billing_zip')
         if billing_zip is not None:
             if is_valid_string(billing_zip):
                 payform_data['billing_zip'] = billing_zip
@@ -217,16 +244,18 @@ class TraxionPay():
         else:
             payform_data['billing_zip'] = ''
 
-        # billing phone
+        # billing country
+        billing_country = billing_details.get('billing_country')
         if billing_country is not None:
             if is_valid_string(billing_country):
                 payform_data['billing_country'] = billing_country
             else:
                 raise TypeError('billing_country should be of type str')
         else:
-            payform_data['billing_country'] = ''
+            payform_data['billing_country'] = 'PH'
 
-        # billing mobile
+        # billing remark
+        billing_remark = billing_details.get('billing_remark')
         if billing_remark is not None:
             if is_valid_string(billing_remark):
                 payform_data['billing_remark'] = billing_mobile
@@ -235,7 +264,7 @@ class TraxionPay():
         else:
             payform_data['billing_remark'] = ''
 
-        # billing phone
+        # payment method
         if payment_method is not None:
             if is_valid_string(payment_method):
                 payform_data['payment_method'] = payment_method
@@ -244,7 +273,7 @@ class TraxionPay():
         else:
             payform_data['payment_method'] = ''
 
-        # billing mobile
+        # status notification url
         if status_notification_url is not None:
             if is_valid_string(status_notification_url):
                 payform_data['status_notification_url'] = status_notification_url
@@ -253,7 +282,7 @@ class TraxionPay():
         else:
             payform_data['status_notification_url'] = ''
 
-        # billing phone
+        # url when successful
         if success_page_url is not None:
             if is_valid_string(success_page_url):
                 payform_data['success_page_url'] = success_page_url
@@ -262,7 +291,7 @@ class TraxionPay():
         else:
             payform_data['success_page_url'] = ''
 
-        # billing mobile
+        # url when failed
         if failure_page_url is not None:
             if is_valid_string(failure_page_url):
                 payform_data['failure_page_url'] = failure_page_url
@@ -271,7 +300,7 @@ class TraxionPay():
         else:
             payform_data['failure_page_url'] = ''
 
-        # billing phone
+        # url when cancelled
         if cancel_page_url is not None:
             if is_valid_string(cancel_page_url):
                 payform_data['cancel_page_url'] = cancel_page_url
@@ -280,7 +309,7 @@ class TraxionPay():
         else:
             payform_data['cancel_page_url'] = ''
 
-        # billing mobile
+        # url when pending
         if pending_page_url is not None:
             if is_valid_string(pending_page_url):
                 payform_data['pending_page_url'] = pending_page_url
@@ -308,5 +337,180 @@ class TraxionPay():
         encoded_payform_data = base64.b64encode(json.dumps(payform_data).encode()).decode('utf-8')
         payload = {'form_data': encoded_payform_data}
 
-        response = requests.post(url='https://devapi.traxionpay.com/payform-link', data=payload)
+        response = requests.post(url='{}/payform-link'.format(BASE_URL), data=payload)
+
+        if not response.ok:
+            raise APIResponseError(response.text)
         return response.url
+
+
+    def fetch_banks(self):
+        """Retrieves list of banks.
+
+        GET `https://devapi.traxionpay.com/banks/`
+        """
+        response = requests.get(url='{}/banks/'.format(BASE_URL))
+
+        if not response.ok:
+            raise APIResponseError(response.text)
+        return response.json()
+
+
+    def fetch_bank_accounts(self):
+        """Retrieves list of usable bank accounts.
+
+        GET `https://devapi.traxionpay.com/payout/bank-account/`
+        """
+        try:
+            response = requests.get(url='{}/payout/bank-account/'.format(BASE_URL),
+                                    headers=self.auth_headers)
+        except AttributeError:
+            raise MissingAuthenticationError()
+
+        if not response.ok:
+            raise APIResponseError(response.text)
+        return response.json()
+
+
+    def link_bank_account(self, bank_code=None, bank_type=None,
+                          account_number=None, account_name=None):
+        """Links or creates a new bank account.
+
+        POST `https://devapi.traxionpay.com/payout/bank-account/`
+
+        :param bank_code:
+
+        :param bank_type:
+
+        :param account_number:
+
+        :param account_name:
+        """
+
+        payload = {}
+
+        # otp
+        if bank_code is not None:
+            if is_valid_string(bank_code):
+                payload['bank_code'] = bank_code
+            else:
+                raise TypeError('bank_code must be of type str')
+        else:
+            raise ValueError('bank_code cannot be None')
+
+        # bank type
+        if bank_type is not None:
+            if is_valid_string(bank_type):
+                if is_valid_bank_type(bank_type):
+                    payload['bank_type'] = bank_type
+                else:
+                    raise ValueError('bank_type must either be "checkings" or "savings"')
+            else:
+                raise TypeError('bank_type must be of type str')
+        else:
+            raise ValueError('bank_type cannot be None')
+
+        # account number
+        if account_number is not None:
+            if is_valid_string(account_number):
+                payload['account_number'] = account_number
+            else:
+                raise TypeError('account_number must be of type str')
+        else:
+            raise ValueError('account_number cannot be None')
+
+        # account name
+        if account_name is not None:
+            if is_valid_string(account_name):
+                length = 50
+                if is_length_acceptable(account_name, length):
+                    payload['account_name'] = account_name
+                else:
+                    raise ValueError('account_name must be less than or equal to {}'.format(length))
+            else:
+                raise TypeError('account_name must be of type str')
+        else:
+            raise ValueError('account_name cannot be None')
+
+        try:
+            response = requests.post(url='{}/payout/bank-account/'.format(BASE_URL),
+                                     headers=self.auth_headers,
+                                     payload=payload)
+        except AttributeError:
+            raise MissingAuthenticationError()
+
+        if not response.ok:
+            raise APIResponseError(response.text)
+        return response.json()
+
+
+    def fetch_otp(self):
+        """Retrieves otp for `cash_out` method.
+
+        POST `https://devapi.traxionpay.com/bank-payout/get-otp/`
+        """
+        try:
+            response = requests.post(url='{}/payout/bank-payout/get-otp/'.format(BASE_URL),
+                                     headers=self.auth_headers)
+        except AttributeError:
+            raise MissingAuthenticationError()
+
+        if not response.ok:
+            raise APIResponseError(response.text)
+        return response.json()
+
+
+    def cash_out(self, otp=None, amount=None, bank_account=None):
+        """The Cash Out feature allows merchants to physically
+        retrieve the money stored in the in-app wallet.
+
+        To Cash Out, the merchant links a bank accout,
+        provides an OTP, and requests a payout to the bank.
+
+        POST `https://devapi.traxionpay.com/payout/bank-payout/`
+
+        :param otp:
+
+        :param amount:
+
+        :param bank_account:
+        """
+        payload = {}
+
+        # otp
+        if otp is not None:
+            if is_valid_string(otp):
+                payload['OTP'] = otp
+            else:
+                raise TypeError('otp must be of type str')
+        else:
+            raise ValueError('otp cannot be None')
+
+        # amount
+        if amount is not None:
+            if is_valid_amount(amount):
+                payload['amount'] = amount
+            else:
+                raise TypeError('amount must be of type float')
+        else:
+            raise ValueError('amount cannot be None')
+
+        # bank account number
+        if bank_account is not None:
+            if is_valid_id(bank_account):
+                payload['bank_account'] = bank_account
+            else:
+                raise TypeError('bank_account must be of type str')
+        else:
+            raise ValueError('bank_account cannot be None')
+
+        try:
+            response = requests.post(url='{}/payout/bank-payout/'.format(BASE_URL),
+                                     headers=self.auth_headers,
+                                     json=payload)
+        except AttributeError:
+            raise MissingAuthenticationError()
+
+        if not response.ok:
+            raise APIResponseError(response.text)
+        return response.json()
