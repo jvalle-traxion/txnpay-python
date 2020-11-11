@@ -13,7 +13,7 @@ pip install txnpay
 ## Usage
 
 #### Initialize
-After installing, initialize by importing the package and using the public and secret keys.
+After installing, initialize by importing the package and using the [public and secret keys](https://dev.traxionpay.com/developers-guide).
 ```python
 from txnpay import Traxionpay
 
