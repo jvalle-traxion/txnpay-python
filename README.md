@@ -4,8 +4,6 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Support](#support)
-- [Contributing](#contributing)
 
 ## Installation
 ```sh
