@@ -27,7 +27,7 @@ class TraxionPay():
         See full documentation at <https://dev.traxionpay.com/developers-guide>.
     """
 
-    def __init__(self, secret_key=None,  api_key=None):
+    def __init__(self, secret_key=None, api_key=None):
         try:
             self.secret_key = secret_key
             self.api_key = api_key
@@ -392,7 +392,7 @@ class TraxionPay():
         # otp
         if bank_code is not None:
             if is_valid_string(bank_code):
-                payload['bank_code'] = bank_code
+                payload['bank'] = bank_code
             else:
                 raise TypeError('bank_code must be of type str')
         else:
@@ -435,7 +435,7 @@ class TraxionPay():
         try:
             response = requests.post(url='{}/payout/bank-account/'.format(BASE_URL),
                                      headers=self.auth_headers,
-                                     payload=payload)
+                                     json=payload)
         except AttributeError:
             raise MissingAuthenticationError()
 

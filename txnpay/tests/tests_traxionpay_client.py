@@ -17,7 +17,7 @@ class TestTraxionPay(unittest.TestCase):
         self.merchant_ref_no = "ABC123DEF456"
         self.amount = 1500.0
         self.description = "My test payment"
-        self.additional_data = base64.b64encode(json.dumps({ "payment_code": self.merchant_ref_no }).encode()).decode('ascii')
+        self.additional_data = base64.b64encode(json.dumps({"payment_code": self.merchant_ref_no}).encode()).decode('ascii')
         self.site_url = "https://dev.traxionpay.com/"
         self.notif_url = "https://devapi.traxionpay.com/callback"
 
@@ -119,6 +119,18 @@ class TestTraxionPay(unittest.TestCase):
         self.assertIsNotNone(cash_in_response)
 
 
+    def test_link_bank_account(self):
+        """Test bank account linking"""
+        response = self.api.link_bank_account(bank_code="161333",
+                                              bank_type="savings",
+                                              account_number="1234123412",
+                                              account_name="John Doe")
+
+        self.assertIn('id', response)
+        self.assertIn('bank_name', response)
+        self.assertIn('account_number', response)
+
+
     def test_fetch_banks_length(self):
         """Test to see if `fetch_banks` returns bank"""
         banks = self.api.fetch_banks()
@@ -135,7 +147,7 @@ class TestTraxionPay(unittest.TestCase):
         bank_accounts = self.api.fetch_bank_accounts()
         self.assertGreater(len(bank_accounts), 0)
 
-    
+
     def test_fetch_otp(self):
         """Test to see if `fetch_otp` returns an otp"""
         otp = self.api.fetch_otp()
