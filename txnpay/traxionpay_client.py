@@ -75,11 +75,11 @@ class TraxionPay():
             :param status_notification_url:
 
             :param success_page_url:
-            
+
             :param failure_page_url:
 
             :param cancel_page_url:
-            
+
             :param pending_page_url:
 
             :billing_details: (optional)
