@@ -58,16 +58,31 @@ class TraxionPay():
 
             POST `https://devapi.traxionpay.com/payform-link`
 
-            :param merchant_id: [`int`] ID of the merchant that would accept the amount to cash in.
+            :param merchant_id:
 
-            :param merchant_ref_no: [`str,100`] A unique transaction code
-            that identifies the transaction.
+            :param merchant_ref_no:
 
-            :param description: [`str,500`] A description that describes the transaction.
+            :param description:
 
-            :param amount: [`float|int`] The amount to be cashed-in to an account.
+            :param amount:
 
-            :param currency: [`float|None`] The currency of the amount. Defaults to `PHP` if None.
+            :param currency: (optional, defaults to PHP if None)
+
+            :param merchant_additional_data:
+
+            :param payment_method: (optional)
+
+            :param status_notification_url:
+
+            :param success_page_url:
+            
+            :param failure_page_url:
+
+            :param cancel_page_url:
+            
+            :param pending_page_url:
+
+            :billing_details: (optional)
         """
         payform_data = {}
 

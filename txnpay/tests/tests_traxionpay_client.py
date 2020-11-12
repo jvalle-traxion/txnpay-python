@@ -121,6 +121,51 @@ class TestTraxionPay(unittest.TestCase):
 
     def test_link_bank_account(self):
         """Test bank account linking"""
+        # Raise value error when bank_code is missing
+        with self.assertRaises(ValueError):
+            self.api.link_bank_account(bank_type="savings",
+                                       account_number="1234123412",
+                                       account_name="John Doe")
+
+        # Raise value error when bank_type is missing
+        with self.assertRaises(ValueError):
+            self.api.link_bank_account(bank_code="161333",
+                                       account_number="1234123412",
+                                       account_name="John Doe")
+
+        # Raise value error when account_number is missing
+        with self.assertRaises(ValueError):
+            self.api.link_bank_account(bank_code="161333",
+                                       bank_type="savings",
+                                       account_name="John Doe")
+
+        # Raise value error when account_name is missing
+        with self.assertRaises(ValueError):
+            self.api.link_bank_account(bank_code="161333",
+                                       bank_type="savings",
+                                       account_number="1234123412")
+
+        # Raise value error when bank_type is not "checkings" or "savings"
+        with self.assertRaises(ValueError):
+            self.api.link_bank_account(bank_code="161333",
+                                       bank_type="save",
+                                       account_number="1234123412",
+                                       account_name="John Doe")
+
+        # Raise type error when bank_code is not type str
+        with self.assertRaises(TypeError):
+            self.api.link_bank_account(bank_code=6311,
+                                       bank_type="savings",
+                                       account_number="1234123412",
+                                       account_name="John Doe")
+
+        # Raise type error when account_number is not type str
+        with self.assertRaises(TypeError):
+            self.api.link_bank_account(bank_code="161333",
+                                       bank_type="savings",
+                                       account_number=12341234,
+                                       account_name="John Doe")
+
         response = self.api.link_bank_account(bank_code="161333",
                                               bank_type="savings",
                                               account_number="1234123412",
