@@ -10,6 +10,7 @@ import requests
 from .constants import BASE_URL
 from .exceptions import MissingAuthenticationError, APIResponseError
 from .utils import (generate_token,
+                    encode_additional_data,
                     is_valid_amount,
                     is_valid_string,
                     is_valid_id,
@@ -133,12 +134,13 @@ class TraxionPay():
 
         # additional merchant data
         if merchant_additional_data is not None:
-            if is_valid_string(merchant_additional_data):
-                payform_data['merchant_additional_data'] = merchant_additional_data
+            if isinstance(merchant_additional_data, dict):
+                encoded_data = encode_additional_data(merchant_additional_data)
+                payform_data['merchant_additional_data'] = encoded_data
             else:
-                raise TypeError('merchant_additional_data should be of type str')
+                raise TypeError('merchant_additional_data should be of type dict')
         else:
-            payform_data['merchant_additional_data'] = ''
+            raise ValueError('merchant_additional_data cannot be None')
 
         # currency
         if currency is not None:

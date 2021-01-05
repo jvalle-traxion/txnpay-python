@@ -23,8 +23,8 @@ traxionpay = TraxionPay(api_key=your_api_key, secret_key=your_secret_key)
 ```python
 # Sample arguments are the bare minimum for cash_in
 response = traxionpay.cash_in(merchant_id=6328,
-                              merchant_ref_no="ABC123DEF",
-                              merchant_additional_data="eyJwYXltZW50X2NvZGUiOiAiQUJDMTIzREVGNDU2IA=",
+                              merchant_ref_no="ABC123DEF456",
+                              merchant_additional_data={"payment_code": "ABC123DEF456"},
                               description="My payment",
                               amount=100.0,
                               status_notification_url="https://www.mysite.com/callback",

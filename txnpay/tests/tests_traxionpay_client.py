@@ -17,7 +17,7 @@ class TestTraxionPay(unittest.TestCase):
         self.merchant_ref_no = "ABC123DEF456"
         self.amount = 1500.0
         self.description = "My test payment"
-        self.additional_data = base64.b64encode(json.dumps({"payment_code": self.merchant_ref_no}).encode()).decode('ascii')
+        self.additional_data = {"payment_code": self.merchant_ref_no}
         self.site_url = "https://dev.traxionpay.com/"
         self.notif_url = "https://devapi.traxionpay.com/callback"
 
